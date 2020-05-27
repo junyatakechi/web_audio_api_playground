@@ -12,64 +12,128 @@ class App extends React.Component<{}, State> {
     return (
       <div className="App">
         <header className="App-header">
-        <h1>test</h1>
-        <audio src="start.mp3" type="audio/mpeg"></audio>
-        <button data-playing="false" role="switch" aria-checked="false">
-          <span>Play/Pause</span>
-        </button>
-        <input css={volumeStyle} type="range" id="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
-
-
+          <h1>test</h1>
         </header>
+
+        <div>
+          <audio className="audio" src="start.mp3" type="audio/mpeg"></audio>
+          <button className="button" data-playing="false" role="switch" aria-checked="false">
+            <span>Play/Pause</span>
+          </button>
+          <input css={volumeStyle} type="range" id="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
+        </div>
+
+        <div>
+          <audio className="audio" src="ending.mp3" type="audio/mpeg"></audio>
+          <button className="button" data-playing="false" role="switch" aria-checked="false">
+            <span>Play/Pause</span>
+          </button>
+          <input css={volumeStyle} type="range" id="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
+        </div>
+
+
+
+
+
       </div>
     );
   }
 
   componentDidMount(){
-    console.log("form componentDidMount");
-    const audioContext = new AudioContext();
-    const audioElement = document.querySelector('audio');
-    //console.log(audioElement);
+    //console.log("form componentDidMount");
+    // const audioElement = document.querySelectorAll('.audio');/////
+    // //console.log(audioElement);
+    // const contextTracks = [];
+    // let context = new AudioContext();
+    // let track = context.createMediaElementSource(audioElement[0]);
+    // track.connect(context.destination);
+    // // select our play button
+    // const playButton = document.querySelector('button');
+    // playButton.addEventListener('click', function() {
+    //   // check if context is in suspended state (autoplay policy)
+    //   if (context.state === 'suspended') {
+    //       context.resume();
+    //   }
+    //
+    //   // play or pause track depending on state
+    //   if (this.dataset.playing === 'false') {
+    //       audioElement[0].play();
+    //       this.dataset.playing = 'true';
+    //   } else if (this.dataset.playing === 'true') {
+    //       audioElement[0].pause();
+    //       this.dataset.playing = 'false';
+    //   }
+    //
+    // }, false);
 
-    // pass it into the audio context
-    const track = audioContext.createMediaElementSource(audioElement);
-    console.log(track);
-    //track.connect(audioContext.destination);
 
-    // select our play button
-    const playButton = document.querySelector('button');
-    playButton.addEventListener('click', function() {
-      // check if context is in suspended state (autoplay policy)
-      if (audioContext.state === 'suspended') {
-          audioContext.resume();
+
+    const contextTracks = [];
+    const audioElement = document.querySelectorAll('.audio');
+    if(audioElement.length >= 1){
+      for(var el of audioElement){
+        let context = new AudioContext();
+        let track = context.createMediaElementSource(el);
+        track.connect(context.destination);
+        contextTracks.push({"context": context, "element": el, "track": track,});
+      }
+    }
+    //console.log(contextTracks.length);
+
+
+    if(contextTracks.length >= 1){
+      let i = 0;
+      //console.log("test");
+      const buttons = document.querySelectorAll(".button")
+      for(let ct of contextTracks){
+
+        //console.log(ct);
+        //let test = i;
+        buttons[i].addEventListener('click', function() {
+          //console.log(test);
+          // check if context is in suspended state (autoplay policy)
+          if (ct["context"].state === 'suspended') {
+              ct["context"].resume();
+          }
+
+          // play or pause track depending on state
+          if (this.dataset.playing === 'false') {
+              ct["element"].play();
+              this.dataset.playing = 'true';
+          } else if (this.dataset.playing === 'true') {
+              ct["element"].pause();
+              this.dataset.playing = 'false';
+          }
+
+        }, false);
+
+        i += 1;
       }
 
-      // play or pause track depending on state
-      if (this.dataset.playing === 'false') {
-          audioElement.play();
-          this.dataset.playing = 'true';
-      } else if (this.dataset.playing === 'true') {
-          audioElement.pause();
-          this.dataset.playing = 'false';
-      }
-
-    }, false);
-
-    audioElement.addEventListener('ended', () => {
-      playButton.dataset.playing = 'false';
-    }, false);
-
-    //音量  最小値がおよそ-3.4で最大値はおよそ3.4です
-    const gainNode = audioContext.createGain();
-    //音声グラフを以前のものから更新する必要があり、入力を gain に接続してから、 gain ノードを出力先に接続します。
-    track.connect(gainNode).connect(audioContext.destination);
-
-    const volumeControl = document.querySelector('#volume');
-    volumeControl.addEventListener('input', function() {
-        gainNode.gain.value = this.value;
-    }, false);
+    }
 
 
+
+
+
+
+
+
+
+
+
+    //
+    // //音量  最小値がおよそ-3.4で最大値はおよそ3.4です
+    // const gainNode = audioContext.createGain();
+    // //音声グラフを以前のものから更新する必要があり、入力を gain に接続してから、 gain ノードを出力先に接続します。
+    // track.connect(gainNode).connect(audioContext.destination);
+    //
+    // const volumeControl = document.querySelector('#volume');
+    // volumeControl.addEventListener('input', function() {
+    //     gainNode.gain.value = this.value;
+    // }, false);
+    //
+    //
 
 
 

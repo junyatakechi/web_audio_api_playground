@@ -4,6 +4,9 @@ node_modules
 .firebase
 
 dist/*.js
-dist/*.mps
+dist/*.mp3
+docs/*.js
+docs/*.mp3
+
 functions/static/
 public/
