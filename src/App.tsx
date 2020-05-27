@@ -20,7 +20,7 @@ class App extends React.Component<{}, State> {
           <button className="button" data-playing="false" role="switch" aria-checked="false">
             <span>Play/Pause</span>
           </button>
-          <input css={volumeStyle} type="range" id="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
+          <input css={volumeStyle} type="range" className="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
         </div>
 
         <div>
@@ -28,7 +28,7 @@ class App extends React.Component<{}, State> {
           <button className="button" data-playing="false" role="switch" aria-checked="false">
             <span>Play/Pause</span>
           </button>
-          <input css={volumeStyle} type="range" id="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
+          <input css={volumeStyle} type="range" className="volume" min="0" max="3.4" defaultValue="1" step="0.1" />
         </div>
 
 
@@ -40,51 +40,27 @@ class App extends React.Component<{}, State> {
   }
 
   componentDidMount(){
-    //console.log("form componentDidMount");
-    // const audioElement = document.querySelectorAll('.audio');/////
-    // //console.log(audioElement);
-    // const contextTracks = [];
-    // let context = new AudioContext();
-    // let track = context.createMediaElementSource(audioElement[0]);
-    // track.connect(context.destination);
-    // // select our play button
-    // const playButton = document.querySelector('button');
-    // playButton.addEventListener('click', function() {
-    //   // check if context is in suspended state (autoplay policy)
-    //   if (context.state === 'suspended') {
-    //       context.resume();
-    //   }
-    //
-    //   // play or pause track depending on state
-    //   if (this.dataset.playing === 'false') {
-    //       audioElement[0].play();
-    //       this.dataset.playing = 'true';
-    //   } else if (this.dataset.playing === 'true') {
-    //       audioElement[0].pause();
-    //       this.dataset.playing = 'false';
-    //   }
-    //
-    // }, false);
-
-
-
+    //audio MediaElementSourceを必要分格納。
     const contextTracks = [];
     const audioElement = document.querySelectorAll('.audio');
     if(audioElement.length >= 1){
       for(var el of audioElement){
         let context = new AudioContext();
         let track = context.createMediaElementSource(el);
-        track.connect(context.destination);
-        contextTracks.push({"context": context, "element": el, "track": track,});
+        let gainNode = context.createGain();
+        track.connect(gainNode).connect(context.destination);
+        contextTracks.push({"track": track, "gainNode": gainNode, });
       }
     }
-    //console.log(contextTracks.length);
+    //console.log(contextTracks[0]);
+    //console.log(contextTracks[0]["track"].mediaElement);
 
 
     if(contextTracks.length >= 1){
       let i = 0;
       //console.log("test");
-      const buttons = document.querySelectorAll(".button")
+      const buttons = document.querySelectorAll(".button");
+      const volumes = document.querySelectorAll('.volume');
       for(let ct of contextTracks){
 
         //console.log(ct);
@@ -92,20 +68,28 @@ class App extends React.Component<{}, State> {
         buttons[i].addEventListener('click', function() {
           //console.log(test);
           // check if context is in suspended state (autoplay policy)
-          if (ct["context"].state === 'suspended') {
-              ct["context"].resume();
+          if (ct["track"].context.state === 'suspended') {
+              ct["track"].context.resume();
           }
 
           // play or pause track depending on state
           if (this.dataset.playing === 'false') {
-              ct["element"].play();
+              ct["track"].mediaElement.play();
               this.dataset.playing = 'true';
           } else if (this.dataset.playing === 'true') {
-              ct["element"].pause();
+              ct["track"].mediaElement.pause();
               this.dataset.playing = 'false';
           }
 
         }, false);
+
+        //volume control
+        volumes[i].addEventListener('input', function() {
+            ct["gainNode"].gain.value = this.value;
+        }, false);
+
+
+
 
         i += 1;
       }
